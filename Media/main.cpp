@@ -47,10 +47,10 @@ T FindFirstNumber(int i, T Fi)
     int tmp=0;
     while(tmp!=1)
     {
-        E=(rand() % Fi-1)+1;
-        for(int i=2;i*i<=E;i++)
+        E=(rand() % Fi-1)+i;
+        for(int j=2;j*j<=E;j++)
         {
-            if(E%i==0)
+            if(E%j==0)
             {
                 tmp=1;
             }
@@ -63,7 +63,7 @@ template<class T>
 T FindD(T Fi, T E)
 {
     int tmp=0;
-    T D=0;
+    T D=1;
     while(tmp != 1)
     {
         if((D*E)%Fi==1)
@@ -74,20 +74,30 @@ T FindD(T Fi, T E)
             D++;
 
     }
-
+return D;
 }
 template<class T>
 T CodindPublicKey(T E,T Mess,T N)
 {
     T C;
-    C=(pow(Mess,E)%N);
+    for(int i=0;i<E;i++)
+    {
+      C*=Mess;
+    }
+    //C=(pow(Mess,E)%N);
+    C=(C%N);
     return C;
 }
 template<class T>
 T EncodingPublicKey(T C,T D, T N)
 {
     T Menc;
-    Menc=(pow(C,D)%N);
+    for(int i=0;i<D;i++)
+    {
+      Menc*=C;
+    }
+    //Menc=(pow(C,D)%N);
+    Menc=(Menc%N);
     return Menc;
 
 }
@@ -116,17 +126,18 @@ int main()
     file.close();
 */
     int P,Q,i,Fi,E,Mess,N,C,D,Messenc;
-    P=11;
-    Q=17;
+    P=7;
+    Q=11;
     i=1;
-    Mess=42;
+    Mess=2;
     N=GenerateKey(P,Q);
-    FiFunction(P,Q);
+    Fi=FiFunction(P,Q);
     E=FindFirstNumber(i,Fi);
     D=FindD(Fi,E);
     C=CodindPublicKey(E,Mess,N);
+    cout<<"Zakodowana wiadomość szyfrem RSA to: "<<C<<endl;
     Messenc=EncodingPublicKey(C,D,N);
-    cout<<"Zakodowana wiadomość szyfrem RSA to: "<<Messenc<<endl;
+    cout<<"Zdekodowana wiadomość szyfrem RSA to: "<<Messenc<<endl;
     return 0;
 }
 
