@@ -1,30 +1,61 @@
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
 #include <math.h>
-
+#include <cstddef>
 using namespace std;
-/*
+
 constexpr char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7',
                            '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
-
-std::string hexStr(char *data, int len)
+string hexStr(char *data, int len)
 {
-  std::string s(len * 3, ' ');
+string s(len * 2, ' ');
+  for (int i = 0; i < len; ++i) {
+    s[2 * i]     = hexmap[(data[i] & 0xF0) >> 4];
+    s[2 * i + 1] = hexmap[data[i] & 0x0F];
+  }
+ /* std::string s(len * 3, ' ');
   for (int i = 0; i < len; ++i) {
     s[3 * i]     = hexmap[(data[i] & 0xF0) >> 4];
     s[3 * i + 1] = hexmap[data[i] & 0x0F];
-    if((i+1)%8==0)
+    if((i+1)%16==0)
         s[3 * i + 2] = '\n';
     else
         s[3 * i + 2] = ' ';
-  }
+  }*/
   return s;
 }
- */
+string XOREncryption(string str, int key)
+{
+    string enc("");
+    for (unsigned int i(0); i < str.length(); i++)
+        enc += str[i] ^ key;
+    return enc;
+}
+string XORDecryption(string str, int key)
+{
+    string dec("");
+    for (unsigned int i(0); i < str.length(); i++)
+        dec += str[i] ^ key;
+    return dec;
+}
+string ToChar(string str)
+{
+    int len = str.length();
+    string newStr;
+    for(int i=0; i< len; i+=2)
+    {
+        string byte = str.substr(i,2);
+        char chr = (char) (int)strtol(byte.c_str(), NULL, 16);
+        newStr.push_back(chr);
+    }
+    return newStr;
+}
 /* RSA KEY GENERATING */
+/*
 template <class T>
 T GenerateKey(T P,T Q)
 {
@@ -101,30 +132,59 @@ T EncodingPublicKey(T C,T D, T N)
     return Menc;
 
 }
-
+*/
 int main()
 {
-    /*
-    std::ifstream in("kot.jpg", std::ios::binary);
 
+    ifstream in("D:/1.jpg", ios::binary);
     char buffer[1151534];
-
     while (in)
     {
         in.read(buffer, sizeof(buffer));
     }
-
     string hex=hexStr(buffer,sizeof(buffer));
-    std::ofstream os("filename.txt");
-    os << hex;
-    std::ofstream file;
-    file.open("kot.jpg", std::ios_base::binary);
-    file.is_open();
+    size_t headerEnd = hex.find( "FFDA" );
+    string header = hex.substr (0,headerEnd+24);
+    string image = hex.substr (headerEnd+24);
+    string endKey ("FFD9");
+    size_t found = image.rfind(endKey);
+    string img = image.substr (0,found);
+    string endImage = image.substr (found);
 
-    for(int i = 0; i < sizeof(buffer) / sizeof(buffer[0]); ++i)
+    string head=ToChar(header);
+    string pixels=ToChar(img);
+    string endMarker=ToChar(endImage);
+
+    string encrypt = XOREncryption(pixels,'F');
+
+    fstream ost("D:/3.jpg", ios_base::binary|ios::out);
+    ost << head;
+
+    ofstream outt("D:/3.jpg", ios_base::binary|ios::out | ios::app);
+    outt << encrypt;
+
+    ofstream outtt("D:/3.jpg", ios_base::binary|ios::out | ios::app);
+    outtt << endMarker;
+
+/*
+
+    ofstream myFile ("D:/bin.txt", ios::out | ios::binary);
+    myFile.write (buffer, sizeof(buffer));
+
+    fstream os("D:/filename.txt", ios::out);
+    os << header;
+
+    std::ofstream out;
+    out.open("D:/filename.txt", ios::out | ios::app);
+    out << image;
+
+    ofstream file;
+    file.open("D:/2.jpg", ios_base::binary);
+    file.is_open();
+    for(unsigned int i = 0; i < sizeof(buffer) / sizeof(buffer[0]); ++i)
        file.write((char*)(buffer + i * sizeof(buffer[0])), sizeof(buffer[0]));
     file.close();
-*/
+
     int P,Q,i,Fi,E,Mess,N,C,D,Messenc;
     P=7;
     Q=11;
@@ -137,7 +197,6 @@ int main()
     C=CodindPublicKey(E,Mess,N);
     cout<<"Zakodowana wiadomość szyfrem RSA to: "<<C<<endl;
     Messenc=EncodingPublicKey(C,D,N);
-    cout<<"Zdekodowana wiadomość szyfrem RSA to: "<<Messenc<<endl;
+    cout<<"Zdekodowana wiadomość szyfrem RSA to: "<<Messenc<<endl;*/
     return 0;
 }
-

@@ -1,0 +1,11 @@
+# depslib dependency file v1.0
+1556375240 source:c:\users\velgherd\desktop\pwr\pamsi\media\main.cpp
+	<iostream>
+	<string>
+	<cstring>
+	<fstream>
+	<sstream>
+	<cstdlib>
+	<math.h>
+	<cstddef>
+
