@@ -28,20 +28,21 @@ string s(len * 2, ' ');
   }*/
   return s;
 }
-string XOREncryption(string str, int key)
+string XOREncryption(string str, char key)
 {
     string enc("");
     for (unsigned int i(0); i < str.length(); i++)
         enc += str[i] ^ key;
     return enc;
 }
-string XORDecryption(string str, int key)
+string XORDecryption(string str, char key)
 {
     string dec("");
     for (unsigned int i(0); i < str.length(); i++)
         dec += str[i] ^ key;
     return dec;
 }
+
 string ToChar(string str)
 {
     int len = str.length();
@@ -53,6 +54,22 @@ string ToChar(string str)
         newStr.push_back(chr);
     }
     return newStr;
+}
+
+void encryptDecrypt(char inpString[]) 
+{ 
+   
+    char xorKey = 'F'; 
+  
+
+    int len = strlen(inpString); 
+  
+  
+    for (int i = 0; i < len; i++) 
+    { 
+        inpString[i] = inpString[i] ^ xorKey; 
+        printf("%c",inpString[i]); 
+    } 
 }
 /* RSA KEY GENERATING */
 /*
@@ -135,8 +152,14 @@ T EncodingPublicKey(T C,T D, T N)
 */
 int main()
 {
-
-    ifstream in("D:/1.jpg", ios::binary);
+	char tab[]="Zwykly napis";
+	string first="Pierwszy";
+	std::cout<<"Tutaj1: "<<XOREncryption(first,'F')<<endl;
+	std::cout<<"Tutaj2: "<<XORDecryption(first,'F')<<endl;
+	encryptDecrypt(tab);
+	encryptDecrypt(tab);
+	/*
+    ifstream in("kot.jpg", ios::binary);
     char buffer[1151534];
     while (in)
     {
@@ -157,34 +180,35 @@ int main()
 
     string encrypt = XOREncryption(pixels,'F');
 
-    fstream ost("D:/3.jpg", ios_base::binary|ios::out);
+    fstream ost("kot.jpg", ios_base::binary|ios::out);
     ost << head;
 
-    ofstream outt("D:/3.jpg", ios_base::binary|ios::out | ios::app);
+    ofstream outt("kot.jpg", ios_base::binary|ios::out | ios::app);
     outt << encrypt;
 
-    ofstream outtt("D:/3.jpg", ios_base::binary|ios::out | ios::app);
+    ofstream outtt("kot.jpg", ios_base::binary|ios::out | ios::app);
     outtt << endMarker;
 
-/*
 
-    ofstream myFile ("D:/bin.txt", ios::out | ios::binary);
+
+    ofstream myFile ("bin.txt", ios::out | ios::binary);
     myFile.write (buffer, sizeof(buffer));
 
-    fstream os("D:/filename.txt", ios::out);
+    fstream os("filename.txt", ios::out);
     os << header;
 
     std::ofstream out;
-    out.open("D:/filename.txt", ios::out | ios::app);
+    out.open("filename.txt", ios::out | ios::app);
     out << image;
 
     ofstream file;
-    file.open("D:/2.jpg", ios_base::binary);
+    file.open("2.jpg", ios_base::binary);
     file.is_open();
     for(unsigned int i = 0; i < sizeof(buffer) / sizeof(buffer[0]); ++i)
        file.write((char*)(buffer + i * sizeof(buffer[0])), sizeof(buffer[0]));
     file.close();
-
+    */
+/*
     int P,Q,i,Fi,E,Mess,N,C,D,Messenc;
     P=7;
     Q=11;
