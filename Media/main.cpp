@@ -7,26 +7,17 @@
 #include <math.h>
 #include <cstddef>
 using namespace std;
-
+    char buffer[1151534];
 constexpr char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7',
                            '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 string hexStr(char *data, int len)
 {
-string s(len * 2, ' ');
+	string s(len * 2, ' ');
   for (int i = 0; i < len; ++i) {
     s[2 * i]     = hexmap[(data[i] & 0xF0) >> 4];
     s[2 * i + 1] = hexmap[data[i] & 0x0F];
   }
- /* std::string s(len * 3, ' ');
-  for (int i = 0; i < len; ++i) {
-    s[3 * i]     = hexmap[(data[i] & 0xF0) >> 4];
-    s[3 * i + 1] = hexmap[data[i] & 0x0F];
-    if((i+1)%16==0)
-        s[3 * i + 2] = '\n';
-    else
-        s[3 * i + 2] = ' ';
-  }*/
-  return s;
+   return s;
 }
 string XOREncryption(string str, char key)
 {
@@ -56,20 +47,11 @@ string ToChar(string str)
     return newStr;
 }
 
-void encryptDecrypt(char inpString[]) 
-{ 
-   
-    char xorKey = 'F'; 
-  
-
-    int len = strlen(inpString); 
-  
-  
-    for (int i = 0; i < len; i++) 
-    { 
-        inpString[i] = inpString[i] ^ xorKey; 
-        printf("%c",inpString[i]); 
-    } 
+string XOR(string &str, int key)
+{
+    for (unsigned int i(0); i < str.length(); i++)
+        str[i] = str[i] ^ key;
+    return str;
 }
 /* RSA KEY GENERATING */
 /*
@@ -154,13 +136,11 @@ int main()
 {
 	char tab[]="Zwykly napis";
 	string first="Pierwszy";
-	std::cout<<"Tutaj1: "<<XOREncryption(first,'F')<<endl;
-	std::cout<<"Tutaj2: "<<XORDecryption(first,'F')<<endl;
-	encryptDecrypt(tab);
-	encryptDecrypt(tab);
-	/*
+	std::cout<<"Tutaj1: "<<XOR(first,'F')<<endl;
+	std::cout<<"Tutaj2: "<<XOR(first,'F')<<endl;
+
     ifstream in("kot.jpg", ios::binary);
-    char buffer[1151534];
+
     while (in)
     {
         in.read(buffer, sizeof(buffer));
@@ -178,7 +158,9 @@ int main()
     string pixels=ToChar(img);
     string endMarker=ToChar(endImage);
 
-    string encrypt = XOREncryption(pixels,'F');
+    string encrypt = XOR(pixels,'F');
+    //string encrypt =XOR(pixels,'F');
+    encrypt=XOR(encrypt,'F');
 
     fstream ost("kot.jpg", ios_base::binary|ios::out);
     ost << head;
@@ -207,7 +189,7 @@ int main()
     for(unsigned int i = 0; i < sizeof(buffer) / sizeof(buffer[0]); ++i)
        file.write((char*)(buffer + i * sizeof(buffer[0])), sizeof(buffer[0]));
     file.close();
-    */
+    
 /*
     int P,Q,i,Fi,E,Mess,N,C,D,Messenc;
     P=7;
