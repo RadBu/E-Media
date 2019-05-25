@@ -7,31 +7,32 @@
 #include <math.h>
 #include <cstddef>
 using namespace std;
-    char buffer[1151534];
+
 constexpr char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7',
                            '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 string hexStr(char *data, int len)
 {
-	string s(len * 2, ' ');
+string s(len * 2, ' ');
   for (int i = 0; i < len; ++i) {
     s[2 * i]     = hexmap[(data[i] & 0xF0) >> 4];
     s[2 * i + 1] = hexmap[data[i] & 0x0F];
   }
-   return s;
+ /* std::string s(len * 3, ' ');
+  for (int i = 0; i < len; ++i) {
+    s[3 * i]     = hexmap[(data[i] & 0xF0) >> 4];
+    s[3 * i + 1] = hexmap[data[i] & 0x0F];
+    if((i+1)%16==0)
+        s[3 * i + 2] = '\n';
+    else
+        s[3 * i + 2] = ' ';
+  }*/
+  return s;
 }
-string XOREncryption(string str, char key)
+string XOR(string &str, int key)
 {
-    string enc("");
     for (unsigned int i(0); i < str.length(); i++)
-        enc += str[i] ^ key;
-    return enc;
-}
-string XORDecryption(string str, char key)
-{
-    string dec("");
-    for (unsigned int i(0); i < str.length(); i++)
-        dec += str[i] ^ key;
-    return dec;
+        str[i] = str[i] ^ key;
+    return str;
 }
 
 string ToChar(string str)
@@ -46,15 +47,8 @@ string ToChar(string str)
     }
     return newStr;
 }
-
-string XOR(string &str, int key)
-{
-    for (unsigned int i(0); i < str.length(); i++)
-        str[i] = str[i] ^ key;
-    return str;
-}
 /* RSA KEY GENERATING */
-/*
+
 template <class T>
 T GenerateKey(T P,T Q)
 {
@@ -68,13 +62,13 @@ T FiFunction(T P,T Q)
     T Fi;
     Fi=(P-1)*(Q-1);
     return Fi;
-
 }
 template <class T>
 T FindFirstNumber(int i, T Fi)
 {
     T E;
     int tmp=0;
+
     while(tmp!=1)
     {
         E=(rand() % Fi-1)+i;
@@ -87,7 +81,6 @@ T FindFirstNumber(int i, T Fi)
         }
     }
     return E;
-
 }
 template<class T>
 T FindD(T Fi, T E)
@@ -102,9 +95,8 @@ T FindD(T Fi, T E)
         }
         else
             D++;
-
     }
-return D;
+
 }
 template<class T>
 T CodindPublicKey(T E,T Mess,T N)
@@ -129,22 +121,25 @@ T EncodingPublicKey(T C,T D, T N)
     //Menc=(pow(C,D)%N);
     Menc=(Menc%N);
     return Menc;
-
 }
-*/
+
+ifstream::pos_type filesize(string filename)
+{
+    ifstream in(filename, ifstream::ate | ifstream::binary);
+    return in.tellg();
+}
 int main()
 {
-	char tab[]="Zwykly napis";
-	string first="Pierwszy";
-	std::cout<<"Tutaj1: "<<XOR(first,'F')<<endl;
-	std::cout<<"Tutaj2: "<<XOR(first,'F')<<endl;
-
-    ifstream in("kot.jpg", ios::binary);
-
+    string fileName="D:/1.jpg";
+    string saveFileName="D:/3.jpg";
+    int arraySize=filesize(fileName);
+    ifstream in(fileName, ios::binary);
+    char buffer[arraySize];
     while (in)
     {
         in.read(buffer, sizeof(buffer));
     }
+
     string hex=hexStr(buffer,sizeof(buffer));
     size_t headerEnd = hex.find( "FFDA" );
     string header = hex.substr (0,headerEnd+24);
@@ -159,48 +154,63 @@ int main()
     string endMarker=ToChar(endImage);
 
     string encrypt = XOR(pixels,'F');
-    //string encrypt =XOR(pixels,'F');
-    encrypt=XOR(encrypt,'F');
-
-    fstream ost("kot.jpg", ios_base::binary|ios::out);
+   //pixels = XOR(encrypt,'F');
+    fstream ost(saveFileName, ios_base::binary|ios::out);
     ost << head;
 
-    ofstream outt("kot.jpg", ios_base::binary|ios::out | ios::app);
+ /*
+   ofstream outt(saveFileName, ios_base::binary|ios::out | ios::app);
+   int segment=1024;
+   for(unsigned int i=0;i>=0;i++){
+        if((segment*(i+1))>pixels.length())
+        {
+            string temp = pixels.substr(segment*i,pixels.length()%segment);
+            string encrypt = XOR(temp,'F');
+            outt << encrypt;
+            break;
+        }
+        else{
+            string temp = pixels.substr(segment*i,segment);
+            string encrypt = XOR(temp,'F');
+            outt << encrypt;
+        }
+    }
+ */
+    ofstream outt(saveFileName, ios_base::binary|ios::out | ios::app);
     outt << encrypt;
 
-    ofstream outtt("kot.jpg", ios_base::binary|ios::out | ios::app);
+    ofstream outtt(saveFileName, ios_base::binary|ios::out | ios::app);
     outtt << endMarker;
 
+/*
 
-
-    ofstream myFile ("bin.txt", ios::out | ios::binary);
+    ofstream myFile ("D:/bin.txt", ios::out | ios::binary);
     myFile.write (buffer, sizeof(buffer));
 
-    fstream os("filename.txt", ios::out);
+    fstream os("D:/filename.txt", ios::out);
     os << header;
 
     std::ofstream out;
-    out.open("filename.txt", ios::out | ios::app);
+    out.open("D:/filename.txt", ios::out | ios::app);
     out << image;
 
     ofstream file;
-    file.open("2.jpg", ios_base::binary);
+    file.open("D:/2.jpg", ios_base::binary);
     file.is_open();
     for(unsigned int i = 0; i < sizeof(buffer) / sizeof(buffer[0]); ++i)
        file.write((char*)(buffer + i * sizeof(buffer[0])), sizeof(buffer[0]));
     file.close();
-    
-/*
+
     int P,Q,i,Fi,E,Mess,N,C,D,Messenc;
-    P=7;
+    P=5;
     Q=11;
     i=1;
-    Mess=2;
-    N=GenerateKey(P,Q);
-    Fi=FiFunction(P,Q);
-    E=FindFirstNumber(i,Fi);
-    D=FindD(Fi,E);
-    C=CodindPublicKey(E,Mess,N);
+    Mess=23553;
+    N=GenerateKey(P,Q);cout<<N<<endl;
+    Fi=FiFunction(P,Q);cout<<Fi<<endl;
+    E=FindFirstNumber(i,Fi);cout<<E<<endl;
+    D=FindD(Fi,E);cout<<D<<endl;
+    C=CodindPublicKey(E,Mess,N);cout<<C<<endl;
     cout<<"Zakodowana wiadomość szyfrem RSA to: "<<C<<endl;
     Messenc=EncodingPublicKey(C,D,N);
     cout<<"Zdekodowana wiadomość szyfrem RSA to: "<<Messenc<<endl;*/
