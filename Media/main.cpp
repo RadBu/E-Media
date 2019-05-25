@@ -64,20 +64,31 @@ T FiFunction(T P,T Q)
     return Fi;
 }
 template <class T>
-T FindFirstNumber(int i, T Fi)
+T FindFirstNumber(T Fi)
 {
-    T E;
-    int tmp=0;
-
-    while(tmp!=1)
+    unsigned int a,b,t;
+    int E,j=2;
+    for(E=1+1;E<Fi;E++)
     {
-        E=(rand() % Fi-1)+i;
-        for(int j=2;j*j<=E;j++)
+        for(j=2;j <E;j++)
         {
-            if(E%j==0)
+            if(E %j==0)
             {
-                tmp=1;
+                break;
             }
+        }
+        if(E==j || E==1)
+        {
+            a=E;
+            b=Fi;
+            while(b)
+            {
+                t = b;
+                b = a % b;
+                a = t;
+            }
+            if(a==1)
+                break;
         }
     }
     return E;
@@ -85,42 +96,51 @@ T FindFirstNumber(int i, T Fi)
 template<class T>
 T FindD(T Fi, T E)
 {
-    int tmp=0;
-    T D=1;
-    while(tmp != 1)
-    {
-        if((D*E)%Fi==1)
-        {
-            tmp=1;
-        }
-        else
-            D++;
-    }
+  int u,w,D,z,q;
 
+  u = 1; w = E;
+  D = 0; z = Fi;
+  while(w)
+  {
+    if(w < z)
+    {
+      q = u; u = D; D = q;
+      q = w; w = z; z = q;
+    }
+    q = w / z;
+    u -= q * D;
+    w -= q * z;
+  }
+  if(z == 1)
+  {
+    if(D < 0) D += Fi;
+        return D;
+  }
+  return 0;
+}
+long long modular_pow(long long base, long long exponent, int modulus)
+{
+    long long result = 1;
+    while (exponent > 0)
+    {
+        if (exponent % 2 == 1)
+            result = (result * base) % modulus;
+        exponent = exponent >> 1;
+        base = (base * base) % modulus;
+    }
+    return result;
 }
 template<class T>
 T CodindPublicKey(T E,T Mess,T N)
 {
-    T C;
-    for(int i=0;i<E;i++)
-    {
-      C*=Mess;
-    }
-    //C=(pow(Mess,E)%N);
-    C=(C%N);
+    T C = modular_pow(Mess,E,N);
     return C;
 }
 template<class T>
 T EncodingPublicKey(T C,T D, T N)
 {
-    T Menc;
-    for(int i=0;i<D;i++)
-    {
-      Menc*=C;
-    }
-    //Menc=(pow(C,D)%N);
-    Menc=(Menc%N);
-    return Menc;
+    T M = modular_pow(C,D,N);
+    return M;
 }
 
 ifstream::pos_type filesize(string filename)
@@ -200,19 +220,18 @@ int main()
     for(unsigned int i = 0; i < sizeof(buffer) / sizeof(buffer[0]); ++i)
        file.write((char*)(buffer + i * sizeof(buffer[0])), sizeof(buffer[0]));
     file.close();
-
-    int P,Q,i,Fi,E,Mess,N,C,D,Messenc;
-    P=5;
-    Q=11;
-    i=1;
-    Mess=23553;
+*/
+    long long P,Q,Fi,E,Mess,N,C,D,Messenc;
+    P=29;
+    Q=53;
+    Mess=1256;
     N=GenerateKey(P,Q);cout<<N<<endl;
     Fi=FiFunction(P,Q);cout<<Fi<<endl;
-    E=FindFirstNumber(i,Fi);cout<<E<<endl;
+    E=FindFirstNumber(Fi);cout<<E<<endl;
     D=FindD(Fi,E);cout<<D<<endl;
-    C=CodindPublicKey(E,Mess,N);cout<<C<<endl;
+    C=CodindPublicKey(E,Mess,N);
     cout<<"Zakodowana wiadomość szyfrem RSA to: "<<C<<endl;
     Messenc=EncodingPublicKey(C,D,N);
-    cout<<"Zdekodowana wiadomość szyfrem RSA to: "<<Messenc<<endl;*/
+    cout<<"Zdekodowana wiadomość szyfrem RSA to: "<<Messenc<<endl;
     return 0;
 }
