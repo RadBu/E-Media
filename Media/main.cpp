@@ -6,8 +6,13 @@
 #include <cstdlib>
 #include <math.h>
 #include <cstddef>
-using namespace std;
+#include <random>
+#include "D:\boost_1_56_0\boost_1_56_0\boost\multiprecision\cpp_int.hpp"
+#include "D:\boost_1_56_0\boost_1_56_0\boost\random.hpp"
 
+using namespace std;
+namespace mp = boost::multiprecision;
+namespace ran = boost::random;
 constexpr char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7',
                            '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 string hexStr(char *data, int len)
@@ -47,8 +52,63 @@ string ToChar(string str)
     }
     return newStr;
 }
+   //
 /* RSA KEY GENERATING */
+typedef ran::independent_bits_engine<mt19937, 128, mp::uint128_t> generator128_type;
+generator128_type gen128;
 
+template<class T>
+T mulmod(T a, T b, T m)
+{
+   T x = 0,y = a % m;
+   while (b > 0) {
+      if (b % 2 == 1) {
+         x = (x + y) % m;
+      }
+      y = (y * 2) % m;
+      b /= 2;
+   }
+   return x % m;
+}
+
+template<class T>
+T modular_pow(T base, T exponent, T modulus)
+{
+    T result = 1;
+    while (exponent > 0)
+    {
+        if (exponent % 2 == 1)
+            result = (result * base) % modulus;
+        exponent = exponent >> 1;
+        base = (base * base) % modulus;
+    }
+    return result;
+}
+template<class T>
+bool Miller(T p, int iteration) {
+   if (p < 2) {
+      return false;
+   }
+   if (p != 2 && p % 2==0) {
+      return false;
+   }
+   T s = p - 1;
+   while (s % 2 == 0) {
+      s /= 2;
+   }
+   for (int i = 0; i < iteration; i++) {
+      T a = rand() % (p - 1) + 1, temp = s;
+      T mod = modular_pow(a, temp, p);
+      while (temp != p - 1 && mod != 1 && mod != p - 1) {
+         mod = mulmod(mod, mod, p);
+         temp *= 2;
+      }
+      if (mod != p - 1 && temp % 2 == 0) {
+         return false;
+      }
+   }
+   return true;
+}
 template <class T>
 T GenerateKey(T P,T Q)
 {
@@ -66,8 +126,7 @@ T FiFunction(T P,T Q)
 template <class T>
 T FindFirstNumber(T Fi)
 {
-    unsigned int a,b,t;
-    int E,j=2;
+    T E,j=2,a,b,t;
     for(E=1+1;E<Fi;E++)
     {
         for(j=2;j <E;j++)
@@ -96,7 +155,7 @@ T FindFirstNumber(T Fi)
 template<class T>
 T FindD(T Fi, T E)
 {
-  int u,w,D,z,q;
+  T u,w,D,z,q;
 
   u = 1; w = E;
   D = 0; z = Fi;
@@ -118,18 +177,6 @@ T FindD(T Fi, T E)
   }
   return 0;
 }
-long long modular_pow(long long base, long long exponent, int modulus)
-{
-    long long result = 1;
-    while (exponent > 0)
-    {
-        if (exponent % 2 == 1)
-            result = (result * base) % modulus;
-        exponent = exponent >> 1;
-        base = (base * base) % modulus;
-    }
-    return result;
-}
 template<class T>
 T CodindPublicKey(T E,T Mess,T N)
 {
@@ -148,9 +195,36 @@ ifstream::pos_type filesize(string filename)
     ifstream in(filename, ifstream::ate | ifstream::binary);
     return in.tellg();
 }
+		string GetBinaryStringFromHexString (string sHex)
+		{
+			string sReturn = "";
+			for (int i = 0; i < sHex.length (); ++i)
+			{
+				switch (sHex [i])
+				{
+					case '0': sReturn.append ("0000"); break;
+					case '1': sReturn.append ("0001"); break;
+					case '2': sReturn.append ("0010"); break;
+					case '3': sReturn.append ("0011"); break;
+					case '4': sReturn.append ("0100"); break;
+					case '5': sReturn.append ("0101"); break;
+					case '6': sReturn.append ("0110"); break;
+					case '7': sReturn.append ("0111"); break;
+					case '8': sReturn.append ("1000"); break;
+					case '9': sReturn.append ("1001"); break;
+					case 'A': sReturn.append ("1010"); break;
+					case 'B': sReturn.append ("1011"); break;
+					case 'C': sReturn.append ("1100"); break;
+					case 'D': sReturn.append ("1101"); break;
+					case 'E': sReturn.append ("1110"); break;
+					case 'F': sReturn.append ("1111"); break;
+				}
+			}
+			return sReturn;
+		}
 int main()
 {
-    string fileName="D:/1.jpg";
+    string fileName="D:/5.jpg";
     string saveFileName="D:/3.jpg";
     int arraySize=filesize(fileName);
     ifstream in(fileName, ios::binary);
@@ -203,10 +277,6 @@ int main()
     outtt << endMarker;
 
 /*
-
-    ofstream myFile ("D:/bin.txt", ios::out | ios::binary);
-    myFile.write (buffer, sizeof(buffer));
-
     fstream os("D:/filename.txt", ios::out);
     os << header;
 
@@ -221,10 +291,18 @@ int main()
        file.write((char*)(buffer + i * sizeof(buffer[0])), sizeof(buffer[0]));
     file.close();
 */
-    long long P,Q,Fi,E,Mess,N,C,D,Messenc;
-    P=29;
-    Q=53;
-    Mess=1256;
+    mp::int1024_t P,Q,Fi,E,Mess,N,C,D,Messenc;
+    do
+    {
+        P=gen128();
+    }while(!Miller(P,9));
+    do
+    {
+        Q=gen128();
+    }while(!Miller(Q,9));
+    cout<<P<<endl;
+    cout<<Q<<endl;
+    Mess=59565;
     N=GenerateKey(P,Q);cout<<N<<endl;
     Fi=FiFunction(P,Q);cout<<Fi<<endl;
     E=FindFirstNumber(Fi);cout<<E<<endl;
