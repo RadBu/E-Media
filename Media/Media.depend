@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1558964645 source:c:\users\velgherd\desktop\pwr\pamsi\media\main.cpp
+1558987610 source:c:\users\velgherd\desktop\pwr\pamsi\media\main.cpp
 	<iostream>
 	<string>
 	<cstring>
@@ -11,6 +11,8 @@
 	<random>
 	"D:\boost_1_56_0\boost_1_56_0\boost\multiprecision\cpp_int.hpp"
 	"D:\boost_1_56_0\boost_1_56_0\boost\random.hpp"
+	"D:\boost_1_56_0\boost_1_56_0\boost\lexical_cast.hpp"
+	<bitset>
 
 1404130704 d:\boost_1_56_0\boost_1_56_0\boost\multiprecision\cpp_int.hpp
 	<iostream>

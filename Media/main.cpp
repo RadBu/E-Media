@@ -9,6 +9,7 @@
 #include <random>
 #include "D:\boost_1_56_0\boost_1_56_0\boost\multiprecision\cpp_int.hpp"
 #include "D:\boost_1_56_0\boost_1_56_0\boost\random.hpp"
+#include <bitset>
 
 using namespace std;
 namespace mp = boost::multiprecision;
@@ -195,36 +196,36 @@ ifstream::pos_type filesize(string filename)
     ifstream in(filename, ifstream::ate | ifstream::binary);
     return in.tellg();
 }
-		string GetBinaryStringFromHexString (string sHex)
+string GetBinaryStringFromHexString (string sHex)
+{
+	string sReturn = "";
+	for (int i = 0; i < sHex.length (); ++i)
+	{
+		switch (sHex [i])
 		{
-			string sReturn = "";
-			for (int i = 0; i < sHex.length (); ++i)
-			{
-				switch (sHex [i])
-				{
-					case '0': sReturn.append ("0000"); break;
-					case '1': sReturn.append ("0001"); break;
-					case '2': sReturn.append ("0010"); break;
-					case '3': sReturn.append ("0011"); break;
-					case '4': sReturn.append ("0100"); break;
-					case '5': sReturn.append ("0101"); break;
-					case '6': sReturn.append ("0110"); break;
-					case '7': sReturn.append ("0111"); break;
-					case '8': sReturn.append ("1000"); break;
-					case '9': sReturn.append ("1001"); break;
-					case 'A': sReturn.append ("1010"); break;
-					case 'B': sReturn.append ("1011"); break;
-					case 'C': sReturn.append ("1100"); break;
-					case 'D': sReturn.append ("1101"); break;
-					case 'E': sReturn.append ("1110"); break;
-					case 'F': sReturn.append ("1111"); break;
-				}
-			}
-			return sReturn;
-		}
+			case '0': sReturn.append ("0000"); break;
+            case '1': sReturn.append ("0001"); break;
+            case '2': sReturn.append ("0010"); break;
+            case '3': sReturn.append ("0011"); break;
+            case '4': sReturn.append ("0100"); break;
+            case '5': sReturn.append ("0101"); break;
+            case '6': sReturn.append ("0110"); break;
+            case '7': sReturn.append ("0111"); break;
+            case '8': sReturn.append ("1000"); break;
+            case '9': sReturn.append ("1001"); break;
+            case 'A': sReturn.append ("1010"); break;
+            case 'B': sReturn.append ("1011"); break;
+            case 'C': sReturn.append ("1100"); break;
+            case 'D': sReturn.append ("1101"); break;
+            case 'E': sReturn.append ("1110"); break;
+            case 'F': sReturn.append ("1111"); break;
+        }
+    }
+    return sReturn;
+}
 int main()
 {
-    string fileName="D:/5.jpg";
+    string fileName="D:/1.jpg";
     string saveFileName="D:/3.jpg";
     int arraySize=filesize(fileName);
     ifstream in(fileName, ios::binary);
@@ -252,6 +253,56 @@ int main()
     fstream ost(saveFileName, ios_base::binary|ios::out);
     ost << head;
 
+    /*    STRING TO INT    */
+
+
+        int k=9;
+    mp::int1024_t P,Q,Fi,E,Mess,N,C,D,Messenc;
+    do
+    {
+        P=gen128();
+    }while(!Miller(P,k));
+    do
+    {
+        Q=gen128();
+    }while(!Miller(Q,k));
+    cout<<P<<endl;
+    cout<<Q<<endl;
+    Mess=5675446363757123347;
+    N=GenerateKey(P,Q);cout<<N<<endl;
+    Fi=FiFunction(P,Q);cout<<Fi<<endl;
+    E=FindFirstNumber(Fi);cout<<E<<endl;
+    D=FindD(Fi,E);cout<<D<<endl;
+    C=CodindPublicKey(E,Mess,N);
+    cout<<"Zakodowana wiadomość szyfrem RSA to: "<<C<<endl;
+    Messenc=EncodingPublicKey(C,D,N);
+    cout<<"Zdekodowana wiadomość szyfrem RSA to: "<<Messenc<<endl;
+       ofstream outt(saveFileName, ios_base::binary|ios::out | ios::app);
+
+    string temps = GetBinaryStringFromHexString(img);
+   int segment=13;
+   for(unsigned int i=0;i>=0;i++){
+        if((segment*(i+1))>temps.length())
+        {
+            string temp = temps.substr(segment*i,temps.length()%segment);
+            mp::int1024_t x=stoll(temp);
+            x=CodindPublicKey(E,x,N);
+            outt << x;
+            break;
+        }
+        else{
+            string temp = temps.substr(segment*i,segment);
+            mp::int1024_t x=stoll(temp);
+            x=CodindPublicKey(E,x,N);
+            outt << x;
+        }
+   }
+    /*      END      */
+
+
+
+
+
  /*
    ofstream outt(saveFileName, ios_base::binary|ios::out | ios::app);
    int segment=1024;
@@ -269,10 +320,10 @@ int main()
             outt << encrypt;
         }
     }
- */
+
     ofstream outt(saveFileName, ios_base::binary|ios::out | ios::app);
     outt << encrypt;
-
+*/
     ofstream outtt(saveFileName, ios_base::binary|ios::out | ios::app);
     outtt << endMarker;
 
@@ -291,25 +342,5 @@ int main()
        file.write((char*)(buffer + i * sizeof(buffer[0])), sizeof(buffer[0]));
     file.close();
 */
-    mp::int1024_t P,Q,Fi,E,Mess,N,C,D,Messenc;
-    do
-    {
-        P=gen128();
-    }while(!Miller(P,9));
-    do
-    {
-        Q=gen128();
-    }while(!Miller(Q,9));
-    cout<<P<<endl;
-    cout<<Q<<endl;
-    Mess=59565;
-    N=GenerateKey(P,Q);cout<<N<<endl;
-    Fi=FiFunction(P,Q);cout<<Fi<<endl;
-    E=FindFirstNumber(Fi);cout<<E<<endl;
-    D=FindD(Fi,E);cout<<D<<endl;
-    C=CodindPublicKey(E,Mess,N);
-    cout<<"Zakodowana wiadomość szyfrem RSA to: "<<C<<endl;
-    Messenc=EncodingPublicKey(C,D,N);
-    cout<<"Zdekodowana wiadomość szyfrem RSA to: "<<Messenc<<endl;
     return 0;
 }
