@@ -9,11 +9,13 @@
 #include <random>
 #include "D:\boost_1_56_0\boost_1_56_0\boost\multiprecision\cpp_int.hpp"
 #include "D:\boost_1_56_0\boost_1_56_0\boost\random.hpp"
-#include <bitset>
+#include "D:\boost_1_56_0\boost_1_56_0\boost/lexical_cast.hpp"
 
 using namespace std;
 namespace mp = boost::multiprecision;
 namespace ran = boost::random;
+
+const mp::int1024_t xorKey=477777777774745848;
 constexpr char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7',
                            '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 string hexStr(char *data, int len)
@@ -23,24 +25,21 @@ string s(len * 2, ' ');
     s[2 * i]     = hexmap[(data[i] & 0xF0) >> 4];
     s[2 * i + 1] = hexmap[data[i] & 0x0F];
   }
- /* std::string s(len * 3, ' ');
-  for (int i = 0; i < len; ++i) {
-    s[3 * i]     = hexmap[(data[i] & 0xF0) >> 4];
-    s[3 * i + 1] = hexmap[data[i] & 0x0F];
-    if((i+1)%16==0)
-        s[3 * i + 2] = '\n';
-    else
-        s[3 * i + 2] = ' ';
-  }*/
   return s;
 }
-string XOR(string &str, int key)
+string XOR(string &str)
 {
+    string key = boost::lexical_cast<string>(xorKey);
+    int k=0;
     for (unsigned int i(0); i < str.length(); i++)
-        str[i] = str[i] ^ key;
+    {
+        if(k==key.length())
+            k=0;
+        str[i] = str[i] ^ key[k];
+        k++;
+    }
     return str;
 }
-
 string ToChar(string str)
 {
     int len = str.length();
@@ -53,8 +52,6 @@ string ToChar(string str)
     }
     return newStr;
 }
-   //
-/* RSA KEY GENERATING */
 typedef ran::independent_bits_engine<mt19937, 128, mp::uint128_t> generator128_type;
 generator128_type gen128;
 
@@ -193,46 +190,19 @@ T EncodingPublicKey(T C,T D, T N)
 
 ifstream::pos_type filesize(string filename)
 {
-    ifstream in(filename, ifstream::ate | ifstream::binary);
-    return in.tellg();
-}
-string GetBinaryStringFromHexString (string sHex)
-{
-	string sReturn = "";
-	for (int i = 0; i < sHex.length (); ++i)
-	{
-		switch (sHex [i])
-		{
-			case '0': sReturn.append ("0000"); break;
-            case '1': sReturn.append ("0001"); break;
-            case '2': sReturn.append ("0010"); break;
-            case '3': sReturn.append ("0011"); break;
-            case '4': sReturn.append ("0100"); break;
-            case '5': sReturn.append ("0101"); break;
-            case '6': sReturn.append ("0110"); break;
-            case '7': sReturn.append ("0111"); break;
-            case '8': sReturn.append ("1000"); break;
-            case '9': sReturn.append ("1001"); break;
-            case 'A': sReturn.append ("1010"); break;
-            case 'B': sReturn.append ("1011"); break;
-            case 'C': sReturn.append ("1100"); break;
-            case 'D': sReturn.append ("1101"); break;
-            case 'E': sReturn.append ("1110"); break;
-            case 'F': sReturn.append ("1111"); break;
-        }
-    }
-    return sReturn;
+    ifstream inputStream(filename, ifstream::ate | ifstream::binary);
+    return inputStream.tellg();
 }
 int main()
 {
     string fileName="D:/1.jpg";
     string saveFileName="D:/3.jpg";
     int arraySize=filesize(fileName);
-    ifstream in(fileName, ios::binary);
+    ifstream inputStream(fileName, ios::binary);
     char buffer[arraySize];
-    while (in)
+    while (inputStream)
     {
-        in.read(buffer, sizeof(buffer));
+        inputStream.read(buffer, sizeof(buffer));
     }
 
     string hex=hexStr(buffer,sizeof(buffer));
@@ -248,15 +218,11 @@ int main()
     string pixels=ToChar(img);
     string endMarker=ToChar(endImage);
 
-    string encrypt = XOR(pixels,'F');
-   //pixels = XOR(encrypt,'F');
-    fstream ost(saveFileName, ios_base::binary|ios::out);
-    ost << head;
+    string encrypt = XOR(pixels);
+    fstream headStream(saveFileName, ios_base::binary|ios::out);
+    headStream << head;
 
-    /*    STRING TO INT    */
-
-
-        int k=9;
+    int k=9;
     mp::int1024_t P,Q,Fi,E,Mess,N,C,D,Messenc;
     do
     {
@@ -266,81 +232,21 @@ int main()
     {
         Q=gen128();
     }while(!Miller(Q,k));
-    cout<<P<<endl;
-    cout<<Q<<endl;
     Mess=5675446363757123347;
-    N=GenerateKey(P,Q);cout<<N<<endl;
-    Fi=FiFunction(P,Q);cout<<Fi<<endl;
-    E=FindFirstNumber(Fi);cout<<E<<endl;
-    D=FindD(Fi,E);cout<<D<<endl;
+    N=GenerateKey(P,Q);
+    Fi=FiFunction(P,Q);
+    E=FindFirstNumber(Fi);
+    D=FindD(Fi,E);
     C=CodindPublicKey(E,Mess,N);
-    cout<<"Zakodowana wiadomość szyfrem RSA to: "<<C<<endl;
+    //cout<<"Zakodowana wiadomość szyfrem RSA to: "<<C<<endl;
     Messenc=EncodingPublicKey(C,D,N);
-    cout<<"Zdekodowana wiadomość szyfrem RSA to: "<<Messenc<<endl;
-       ofstream outt(saveFileName, ios_base::binary|ios::out | ios::app);
+    //cout<<"Zdekodowana wiadomość szyfrem RSA to: "<<Messenc<<endl;
 
-    string temps = GetBinaryStringFromHexString(img);
-   int segment=13;
-   for(unsigned int i=0;i>=0;i++){
-        if((segment*(i+1))>temps.length())
-        {
-            string temp = temps.substr(segment*i,temps.length()%segment);
-            mp::int1024_t x=stoll(temp);
-            x=CodindPublicKey(E,x,N);
-            outt << x;
-            break;
-        }
-        else{
-            string temp = temps.substr(segment*i,segment);
-            mp::int1024_t x=stoll(temp);
-            x=CodindPublicKey(E,x,N);
-            outt << x;
-        }
-   }
-    /*      END      */
+    ofstream dataStream(saveFileName, ios_base::binary|ios::out | ios::app);
+    dataStream << encrypt;
 
+    ofstream endStream(saveFileName, ios_base::binary|ios::out | ios::app);
+    endStream << endMarker;
 
-
-
-
- /*
-   ofstream outt(saveFileName, ios_base::binary|ios::out | ios::app);
-   int segment=1024;
-   for(unsigned int i=0;i>=0;i++){
-        if((segment*(i+1))>pixels.length())
-        {
-            string temp = pixels.substr(segment*i,pixels.length()%segment);
-            string encrypt = XOR(temp,'F');
-            outt << encrypt;
-            break;
-        }
-        else{
-            string temp = pixels.substr(segment*i,segment);
-            string encrypt = XOR(temp,'F');
-            outt << encrypt;
-        }
-    }
-
-    ofstream outt(saveFileName, ios_base::binary|ios::out | ios::app);
-    outt << encrypt;
-*/
-    ofstream outtt(saveFileName, ios_base::binary|ios::out | ios::app);
-    outtt << endMarker;
-
-/*
-    fstream os("D:/filename.txt", ios::out);
-    os << header;
-
-    std::ofstream out;
-    out.open("D:/filename.txt", ios::out | ios::app);
-    out << image;
-
-    ofstream file;
-    file.open("D:/2.jpg", ios_base::binary);
-    file.is_open();
-    for(unsigned int i = 0; i < sizeof(buffer) / sizeof(buffer[0]); ++i)
-       file.write((char*)(buffer + i * sizeof(buffer[0])), sizeof(buffer[0]));
-    file.close();
-*/
     return 0;
 }
